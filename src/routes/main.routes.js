@@ -7,21 +7,86 @@ var pgp = require('pg-promise')();//necessary because it need options or it gets
 
 const router = express.Router();
 
-// Arrow functions
-router.get('/', (req, res) => {
-	let parser = new Parser();
-	var db = pgp("postgres://postgres:123456@localhost:1234/facebook_data_country");
-	parser.parse('./data/Facebook Insights Data Export - Visualization Studio VIC - 2014-01-01 - 2014-02-27.csv', (data) => {
-		for(var date in data.Date){
-			console.log(date);
-		}
+
+
+router.get('/getCountryData/:country', (req, res) => {
+	var db = pgp("postgres://postgres:123456@localhost:1234/postgres");
+	console.log("fetching country data");
+	db.manyOrNone("select * from facebook_data_country where country="+req.params.country)
+	.then(data => {
+		console.log("finished fetching country data")
+		res.jsonp(data);
+	})
+	.catch(error => {
+		console.log(error);
+		res.send(error);
+	});
+
+});
+
+router.get('/getCountries', (req, res) => {
+	var db = pgp("postgres://postgres:123456@localhost:1234/postgres");
+	console.log("fetching country data");
+	db.manyOrNone("select distinct country from facebook_data_country")
+	.then(data => {
+		console.log("finished fetching country data")
+		let countries = _.map(data, obj => {
+			return obj.country;
+		});
+		res.jsonp(countries);
+	})
+	.catch(error => {
+		console.log(error);
+		res.send(error);
+	});
+
+});
+
+
+router.get('/getCountryDatas', (req, res) => {
+	var db = pgp("postgres://postgres:123456@localhost:1234/postgres");
+	console.log("fetching country data");
+	db.manyOrNone("select * from facebook_data_country")
+	.then(data => {
+		console.log("finished fetching country data")
+		res.jsonp(data);
+	})
+	.catch(error => {
+		console.log(error);
+		res.send(error);
+	});
+
+});
+
+
+router.get('/getCityData', (req, res) => {
+	var db = pgp("postgres://postgres:123456@localhost:1234/postgres");
+	console.log("fetching country data");
+	db.manyOrNone("select * from facebook_data_city")
+	.then(data => {
+		console.log("finished fetching country data")
+		res.jsonp(data);
+	})
+	.catch(error => {
+		console.log(error);
+		res.send(error);
 	});
 });
 
-
-router.get('/insertData', (req, res) => {
-	console.log("Hej2");
+router.get('/getDemographicData', (req, res) => {
+	var db = pgp("postgres://postgres:123456@localhost:1234/postgres");
+	console.log("fetching country data");
+	db.manyOrNone("select * from facebook_data_demographic")
+	.then(data => {
+		console.log("finished fetching country data")
+		res.jsonp(data);
+	})
+	.catch(error => {
+		console.log(error);
+		res.send(error);
+	});
 
 });
+
 // Exporting an object as the default import for this module
 export default router;

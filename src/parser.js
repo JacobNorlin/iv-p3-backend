@@ -19,6 +19,31 @@ export default class Parser{
 		
 	}
 
+	splitOnDash(metricByCountryRow){
+
+		return _(metricByCountryRow).omit("Date").mapKeys((value, key, obj) => {
+			return key.split(" - ")[1];
+		}).value();
+	}
+
+	formatDate(date){
+		return _.map(date.split('/'), n => {
+			if(n.length === 1){
+				return "0"+n;
+			}else{
+				return n;
+			}
+		}).join("-");
+	}
+
+	parseCity(city){
+		return city.split(',')[0];
+	}
+
+	fixInvalidData(data){
+		return data ? data : 0;
+	}
+
 	useFilter(filter){
 		return (value, key) => {
 			return key.indexOf(filter) > -1 || key === this.geoFilters.date;
@@ -27,14 +52,14 @@ export default class Parser{
 
 	filterData(data, filter){
 		return _.map(data, obj => {
-			return _.pickBy(obj,this.useFilter(filter));
+			return _.pickBy(obj, this.useFilter(filter));
 		});
 	}
 
 	indexByDate(data){
-		return _.mapKeys(data, (value, key) => {
-			return value.Date;
-		});
+		return _(data).mapKeys((value, key) => {
+			return this.formatDate(value.Date);
+		}).mapValues(this.splitOnDash).value();
 	}
 
 	indexByCountry(dataIndexedByMetric){
@@ -50,10 +75,13 @@ export default class Parser{
 
 				let data = result.data;
 
-				let filteredData = _.mapValues(this.geoFilters, (filter, key, obj) => {
+				let dataIndexedByDate = _.mapValues(this.geoFilters, (filter, key, obj) => {
 					return this.indexByDate(this.filterData(data, filter));
 				});
-				callback(filteredData);
+
+
+
+				callback(dataIndexedByDate);
 			}
 		});
 	}

@@ -21,8 +21,8 @@ var filterByDashSplit = function(metricByCountryRow){
 }
 
 var dbHandler = new DataBaseHandler();
-
-// dbHandler.insertFacebookCsv('./data/Facebook Insights Data Export - Visualization Studio VIC - 2014-08-24 - 2015-02-19.csv')
+// dbHandler.insertAllFilesInDir('./data/generic/');
+// dbHandler.insertFacebookCsv('./data/Facebook Insights Data Export - Visualization Studio VIC - 2015-08-19 - 2016-02-15.csv')
 
 
 

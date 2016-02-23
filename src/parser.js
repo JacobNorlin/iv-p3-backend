@@ -22,7 +22,7 @@ export default class Parser{
 	splitOnDash(metricByCountryRow){
 
 		return _(metricByCountryRow).omit("Date").mapKeys((value, key, obj) => {
-			return key.split(" - ")[1];
+			return key.split(" - ")[1].toLowerCase();
 		}).value();
 	}
 

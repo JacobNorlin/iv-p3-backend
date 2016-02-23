@@ -1,6 +1,7 @@
 "use strict";
 
 import Parser from './parser.js';
+import fs from 'fs';
 
 var pgp = require('pg-promise')();
 
@@ -10,6 +11,14 @@ export default class DataBaseHandler{
 	constructor(){
 		this.db = pgp("postgres://postgres:123456@localhost:1234/postgres");
 		this.parser = new Parser();
+	}
+
+	insertAllFilesInDir(dir){
+		let files = fs.readdirSync(dir);
+		for(var file in files){
+			console.log(dir+files[file]);
+			this.insertFacebookCsv(dir+files[file]);
+		}
 	}
 
 	insertFacebookCsv(csvPath){

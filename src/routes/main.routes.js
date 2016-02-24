@@ -9,9 +9,35 @@ const router = express.Router();
 
 
 
+router.get('/getDemographicDatas/:date', (req, res) => {
+	var db = pgp("postgres://postgres:123456@localhost:1234/postgres");
+	db.manyOrNone("select * from facebook_data_demographic where date=\'"+req.params.date+"\'")
+	.then(data => {
+		res.jsonp(data);
+	})
+	.catch(error => {
+		console.log(error);
+		res.send(error);
+	});
+
+});
+
 router.get('/getCountryDatas/:date', (req, res) => {
 	var db = pgp("postgres://postgres:123456@localhost:1234/postgres");
 	db.manyOrNone("select * from facebook_data_country where date=\'"+req.params.date+"\'")
+	.then(data => {
+		res.jsonp(data);
+	})
+	.catch(error => {
+		console.log(error);
+		res.send(error);
+	});
+
+});
+
+router.get('/getCityDatas/:date', (req, res) => {
+	var db = pgp("postgres://postgres:123456@localhost:1234/postgres");
+	db.manyOrNone("select * from facebook_data_city where date=\'"+req.params.date+"\'")
 	.then(data => {
 		res.jsonp(data);
 	})
@@ -124,7 +150,7 @@ router.get('/getDemographics', (req, res) => {
 
 });
 
-router.get('/getDemographic/:demographic', (req, res) => {
+router.get('/getDemographicData/:demographic', (req, res) => {
 	var db = pgp("postgres://postgres:123456@localhost:1234/postgres");
 	db.manyOrNone("select * from facebook_data_demographic ilike \'"+req.params.demographic+"\'")
 	.then(data => {

@@ -16,6 +16,22 @@ export default class Parser{
 			// weeklyTotalImpressions: "Weekly Total Impressions", 
 			date: 					"Date",
 		};
+
+		this.genericFilters = {
+			lifetimeTotalLikes: "Lifetime Total Likes",
+			dailyNewLikes: "Daily New Likes",
+			dailyPageEngagedUsers: "Daily Page Engaged Users",
+			dailyTotalReach: "Daily Total Reach",
+			dailyOrganicReach: "Daily Organic Reach",
+			dailyTotalImpressions: "Daily Total Impressions",
+			dailyOrganicImpressions: "Daily Organic impressions",
+			dailyPageConsumptions: "Daily Page consumptions",
+			dailyLinkClicks: "Daily People who interacted with your Page content by content type - link clicks",
+			dailyOtherClicks: "Daily People who interacted with your Page content by content type - other clicks",
+			dailyPhotoClicks: "Daily People who interacted with your Page content by content type - photo view",
+			dailyVideoClicks: "Daily People who interacted with your Page content by content type - video play",
+			date: "Date"
+		};
 		
 	}
 
@@ -59,7 +75,7 @@ export default class Parser{
 	indexByDate(data){
 		return _(data).mapKeys((value, key) => {
 			return this.formatDate(value.Date);
-		}).mapValues(this.splitOnDash).value();
+		});
 	}
 
 	indexByCountry(dataIndexedByMetric){
@@ -76,10 +92,25 @@ export default class Parser{
 				let data = result.data;
 
 				let dataIndexedByDate = _.mapValues(this.geoFilters, (filter, key, obj) => {
-					return this.indexByDate(this.filterData(data, filter));
+					return this.indexByDate(this.filterData(data, filter)).mapValues(this.splitOnDash).value();
 				});
 
 
+
+				callback(dataIndexedByDate);
+			}
+		});
+	}
+	//Generic data = non country/city/demographic data etc.. Just regular data about the page.
+	parseGenericData(path, callback){
+		var csv = fs.readFileSync(path);
+		Papa.parse(csv.toString(), {
+			header: true,
+			complete: result => {
+				let data = result.data;
+				let dataIndexedByDate = _.mapValues(this.genericFilters, (filter, key, obj) => {
+					return this.indexByDate(this.filterData(data, filter)).value();
+				});
 
 				callback(dataIndexedByDate);
 			}

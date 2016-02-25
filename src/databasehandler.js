@@ -3,14 +3,19 @@
 import Parser from './parser.js';
 import fs from 'fs';
 import _ from 'lodash';
+import {cfg} from './db.cfg';
 
 var pgp = require('pg-promise')();
 
 export default class DataBaseHandler{
 	
 	constructor(){
-		this.db = pgp("postgres://postgres:123456@localhost:1234/postgres");
+		this.db = pgp(cfg);
 		this.parser = new Parser();
+	}
+
+	manyOrNone(query){
+		return this.db.manyOrNone(query);
 	}
 
 	insertAllFilesInDir(dir){
@@ -19,18 +24,24 @@ export default class DataBaseHandler{
 			let path = dir+files[file];
 			console.log(path);
 			this.insertFacebookCsv(path);
-			this.insertGeneric(path)
+			this.insertGeneric(path);
+
 		}
+
 	}
 
-	insertGeneric(csvPath){
+	foo(){
+		console.log(this.transaction);
+	}
+
+	insertGeneric(csvPath,transaction){
 		this.parser.parseGenericData(csvPath, data => {
 			for(let date in data.date){
-				let insertData = {}
+				let insertData = {};
 				for(let prop in data){
 					let row = data[prop][date];
 					for(let value in row){
-						insertData[value] = row[value];
+						insertData[value] = this.parser.fixInvalidData(row[value]);
 					}
 				}
 				insertData = _(insertData).pickBy((value, key) => {
@@ -38,15 +49,17 @@ export default class DataBaseHandler{
 				}).map((value, key) => {	
 					return value;
 				}).value();
-				console.log(insertData)
+				// console.log(insertData)
 
 				this.insertGenericData(insertData);
 			}
-		})
+		});
 	}
 
 	insertFacebookCsv(csvPath){
 		this.parser.parse(csvPath, (data) => {
+			
+			let query = "BEGIN; ";
 			for(let date in data.date){
 				let demoLikeDate = data.lifetimeLikesByAgeAndGender[date];
 				let demoReachDate = data.weeklyReachDemographics[date];
@@ -64,7 +77,7 @@ export default class DataBaseHandler{
 						date: date,
 						type: demo
 					};
-					this.insertRow("facebook_data_demographic", insertData, "demographic");
+					query+=(this.insertRow("facebook_data_demographic", insertData, "demographic"));
 				}
 
 				for(var country in data.lifetimeLikesByCountry[date]){
@@ -76,7 +89,7 @@ export default class DataBaseHandler{
 						date: date,
 						type: country
 					};
-					this.insertRow("facebook_data_country", insertData, "country");
+					query+=(this.insertRow("facebook_data_country", insertData, "country"));
 
 				}
 
@@ -89,18 +102,27 @@ export default class DataBaseHandler{
 						date: date,
 						type: this.parser.parseCity(city)	
 					};
-					this.insertRow("facebook_data_city", insertData, "city");
-
+					query+=(this.insertRow("facebook_data_city", insertData, "city"));
 				}
+				
 			}
-		});
+			query+="COMMIT;";
+			this.db.none(query)
+			.then(() => {
+				console.log("yay");
+			}).catch((error) => {
+				console.log(error);
+			});
+
+			});
 
 
 	}
 
 
 	insertGenericData(insertData){
-		let insert = "INSERT into facebook_data_generic (date, lifetime_total_likes , daily_new_likes, daily_engaged_users, daily_total_reach, daily_organic_reach, daily_total_impressions, daily_organic_impressions, daily_page_consumptions, daily_link_clicks, daily_other_clicks, daily_photo_clicks, daily_video_clicks) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)";
+		let insert = "INSERT into facebook_data_generic (date, lifetime_total_likes , daily_new_likes, daily_engaged_users, daily_total_reach, daily_organic_reach, daily_total_impressions, daily_organic_impressions, daily_page_consumptions, daily_link_clicks, daily_other_clicks, daily_photo_clicks, daily_video_clicks) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13); ";
+
 		this.db.none(insert, insertData)
 		.then(() => {
 			console.log("success!");
@@ -110,28 +132,8 @@ export default class DataBaseHandler{
 		});
 	}
 
-	insertCountryData(countryDatas){
-		for(var cd in countryDatas){
-			var insertData = {
-
-			}
-			// insertRow("facebook_data_country", )
-		}		
-	}
-
-
-
-
-	insertRow(table, insertData, type){
-		let insert = "INSERT into "+table+"(lifetime_likes, weekly_reach, "+type+", date) VALUES(${likes}, ${reach}, ${type}, ${date})";
-
-		this.db.none(insert, insertData)
-		.then(() => {
-			console.log("success!");
-		})
-		.catch(error => {
-			console.log(error);
-		})	
+	insertRow(table, insertData, type, transaction){
+		return "INSERT into "+table+"(lifetime_likes, weekly_reach, "+type+", date) VALUES("+insertData.likes+", "+insertData.reach+", \'"+insertData.type+"\', \'"+insertData.date+"\'); ";	
 	}
 
 

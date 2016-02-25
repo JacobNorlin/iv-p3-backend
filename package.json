@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "node_modules/babel/bin/babel.js src --source-maps --out-dir dist",
-    "start": "node node_modules/nodemon/bin/nodemon.js -- node_modules/babel/bin/babel-node.js src/server.js"
+    "startunix": "node node_modules/nodemon/bin/nodemon.js -- node_modules/babel/bin/babel-node.js src/server.js",
+    "start": "node node_modules\\nodemon\\bin\\nodemon.js -- node_modules\\babel\\bin\\babel-node.js src\\server.js"
   },
   "author": "jna",
   "license": "ISC",

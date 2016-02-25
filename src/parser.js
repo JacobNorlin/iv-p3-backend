@@ -32,6 +32,20 @@ export default class Parser{
 			dailyVideoClicks: "Daily People who interacted with your Page content by content type - video play",
 			date: "Date"
 		};
+
+		this.postFilters = {
+			postId: "Post ID",
+			permalink: "Permalink",
+			postMessage: "Post Message",
+			type: "Type",
+			date: "Posted",
+			lifetimeTotalReach: "Lifetime Post Total Reach",
+			lifetimeTotalImpressions: "Lifetime Post Total Impressions",
+			lifetimeEngagedUsers: "Lifetime Engaged Users",
+			lifetimePostConsumers: "Lifetime Post Consumers",
+			lifetimePostConsumptions: "Lifetime Post Consumptions",
+			lifetimeTaklingAboutThis: "Lifetime Talking About This (Post)"
+		}
 		
 	}
 
@@ -113,6 +127,29 @@ export default class Parser{
 				});
 
 				callback(dataIndexedByDate);
+			}
+		});
+	}
+
+	parsePostData(path, callback){
+		var csv = fs.readFileSync(path);
+		Papa.parse(csv.toString(), {
+			header: true,
+			complete: result => {
+				let data = result.data;
+				let filteredData = _.mapValues(this.postFilters, (filter, key, obj) => {
+					return this.filterData(data, filter)
+				});
+
+
+				// let dateIndexed = _.groupBy(filteredData, val => {
+				// 	console.log(val)
+				// })
+				for(var i in filteredData.date){
+					console.log(filteredData.date[i]);
+				}
+
+				callback(filteredData);
 			}
 		});
 	}

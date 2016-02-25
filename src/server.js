@@ -22,17 +22,19 @@ var filterByDashSplit = function(metricByCountryRow){
 
 var dbHandler = new DataBaseHandler();
 var parser = new Parser();
-// parser.parseGenericData('./data/generic/Facebook Insights Data Export - Visualization Studio VIC - 2015-08-19 - 2016-02-15.csv', () => {})
+
+// dbHandler.insertPostCsv('./data/postlevel/Facebook Insights Data Export (Post Level) - Visualization Studio VIC - 2014-08-24 - 2015-02-19	.csv')
 // dbHandler.insertAllFilesInDir('./data/generic/');
+// dbHandler.insertPostFiles();
 // dbHandler.insertGeneric('./data/generic/Facebook Insights Data Export - Visualization Studio VIC - 2015-08-19 - 2016-02-15.csv')
 
 
 
 // arrow function
-const server = app.listen(3000, () => {
-	// destructuring
-	const {address, port} = server.address();
+	const server = app.listen(3000, () => {
+		// destructuring
+		const {address, port} = server.address();
 
-  // string interpolation:
-  console.log(`Example app listening at http://${address}:${port}`);
-});
+	  // string interpolation:
+	  console.log(`Example app listening at http://${address}:${port}`);
+	});

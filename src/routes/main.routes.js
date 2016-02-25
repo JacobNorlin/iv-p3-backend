@@ -10,6 +10,18 @@ const router = express.Router();
 
 const db = new DataBaseHandler();
 
+
+router.get('/getPostData/:date', (req, res) => {
+	db.manyOrNone("select * from facebook_data_post where posted=\'"+req.params.date+"\'")
+	.then(data => {
+		res.jsonp(data);
+	})
+	.catch(error => {
+		console.log(error);
+		res.send(error);
+	});
+});
+
 router.get('/getGenericDatas/:date', (req, res) => {
 	db.manyOrNone("select * from facebook_data_generic where date=\'"+req.params.date+"\'")
 	.then(data => {
